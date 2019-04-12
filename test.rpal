@@ -1,0 +1,4 @@
+let f no = rf no 1 where //this is a comment
+        rec rf no r = no eq 1 -> r | rf  (no-1) (no*r)
+in Print (f 3)
+
