@@ -404,17 +404,9 @@ public class STTransformer extends Parser {
 
     public void constructAST (String rpalFileName) {
         this.rpalFileName = rpalFileName;
-        p = new Parser (rpalFileName);
-        try {
-            p.fn_E();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (nextToken.equalsIgnoreCase("PARSE_COMPLETE")) {
-            System.out.println ("*******PARSING COMPLETE*****");
-            System.out.println ("-------TREE VALUES----------");
-            p.preOrderTraversal ();
-        }
+        p = new ASTParser (rpalFileName);
+        p.preOrderTraversal ();
+
 
     }
 
