@@ -1,4 +1,2 @@
-let f no = rf no 1 where //this is a comment
-        rec rf no r = no eq 1 -> r | rf  (no-1) (no*r)
-in Print (f 3)
-
+let f g = g 3 in let h x = x + 1
+in Print(f h)
