@@ -57,21 +57,17 @@ public class CSEMachine {
 
             stack.push("PE_0");
 
-            System.out.println ("About to process " + controlStructure);
 
             // get the last element from the control structure and examine if its jus an identifier or gamma
 
             while (controlStructure.size() > 0) {     // the last left out value will be the PE_0 env
-                System.out.println (controlStructure);
-                System.out.println ("Stack content " + stack.toString());
+
 
                 controlStructureLength = controlStructure.size();
                 String item = (String) controlStructure.get(controlStructureLength-1);
                 item = item.trim();
                 item = item.replaceAll(";", "");    // hack for tuples
                 controlStructure.remove(controlStructureLength-1);
-
-                System.out.println ("ITEM:  " + item);
 
                 if (item.equals("")) {
                     continue;
@@ -138,7 +134,6 @@ public class CSEMachine {
                     continue;
                 }
                 else if (item.equals("&")) {
-                    System.out.println ("Prash ");
                     String rand1 = (String) stack.pop();
                     String rand2 = (String) stack.pop();
 
@@ -233,7 +228,6 @@ public class CSEMachine {
                     item = item.replaceAll("deltathen:", "");
                     // if its a string, just return it.
                     if (item.startsWith("<STR:") || isString (item)) {
-                        System.out.println ("Hey! this is a string ");
                         controlStructure.add(item);
                         continue;
                     }
@@ -245,7 +239,6 @@ public class CSEMachine {
                     continue;
                 }
                 else if (item.indexOf(" ")>=0 && !isString(getValueofToken(item)) ) {
-                    System.out.println ("Maybe i caught a tuple" );
                     StringTokenizer st = new StringTokenizer (item, " ");
                     while (st.hasMoreTokens()) {
                         controlStructure.add(st.nextToken());
@@ -257,12 +250,10 @@ public class CSEMachine {
                     String value = (String) stack.pop();
                     String envEnd = (String) stack.pop();
 
-                    if (item.equals(envEnd)) {
-                        System.out.println ("Lambda Closure achieved on environment " + item);
-                    }
+
                     // put the value back in the stack
                     if (item.equals("PE_0")) {
-                        System.out.println ("Execution complete. Final Value " + value);
+                        System.out.println(value);
                     }
                     else {
                         stack.push(value);
@@ -351,7 +342,6 @@ public class CSEMachine {
                     // lookup in the current environment, get the value and push it on to the stack.
                     int tempEnvMarker = envMarker;
                     while (tempEnvMarker >=0 ) {
-                        System.out.println ("Looking up " + item + " in env " + (tempEnvMarker-1));
                         currenvMapping = (HashMap) environmentHash.get("PE_" + (tempEnvMarker-1));
                         if (currenvMapping != null &&  currenvMapping.get(item) != null) {
                             break;
@@ -359,13 +349,11 @@ public class CSEMachine {
                         tempEnvMarker--;
                     }
                     String value = (String) currenvMapping.get(item);
-                    System.out.println ("Identifer " + item + " value pushed to stack " + value);
                     stack.push(value);
                 }
 
                 else if (item.startsWith(STTransformer.LAMBDA)) {
                     item = item + ":" + envMarker;
-                    System.out.println ("Pushing lambda into stack " + item);
                     stack.push(item);
                 }
 
@@ -381,7 +369,6 @@ public class CSEMachine {
 
 
                         if (nextStackTop.startsWith(STTransformer.LAMBDA)) {
-                            System.out.println ("Next stack top is lambda");
                             // we should push Eta_i_v:c, Workaround is to rename lambda into eta and push it into the stack.
 
                             nextStackTop = nextStackTop.replace(STTransformer.LAMBDA, "ETA");
@@ -426,8 +413,6 @@ public class CSEMachine {
                         // need to handle tuples...
                         String lambdaNode = (String) stack.pop();
                         String rand = (String) stack.pop();
-                        //System.out.println ("lambda node " + lambdaNode);
-                        //System.out.println ("rand node " + rand);
 
                         String X = getX(lambdaNode);
                         HashMap currEnvMapping = new HashMap ();
@@ -493,27 +478,22 @@ public class CSEMachine {
                                 i++;
                             }
                             environmentHash.put("PE_"+envMarker, currEnvMapping);
-                            System.out.println ("env hash " + "PE_"+envMarker + environmentHash);
                         }
 
                         else {
                             currEnvMapping.put(X, rand);
                             environmentHash.put("PE_"+envMarker, currEnvMapping);
-                            System.out.println ("env hash " +"PE_"+envMarker+ environmentHash);
                         }
 
                         envMarker++;
                         String newPE = "PE_"+envMarker;
 
                         int k = getK(lambdaNode);
-                        System.out.println ("K value " + k);
                         controlStructure.add(newPE);
                         stack.push(newPE);
 
                         ArrayList deltaK = getControlStructure (k);
-                        //System.out.println ("delta K " + deltaK);
                         controlStructure.addAll(deltaK);    // append the ouput of deltaK
-                        //System.out.println ("after appending " + controlStructure);
                     }
                 }
                 else {
@@ -546,7 +526,6 @@ public class CSEMachine {
     }
 
     public String getX(String lambdaNode) {
-        System.out.println ("got x " + lambdaNode);
         if (lambdaNode.startsWith("{")) {
             String st = lambdaNode.substring(1, lambdaNode.length()-1);
             return st;
@@ -676,7 +655,6 @@ public class CSEMachine {
                     return ""+result;
 
                 case '-':
-                    System.out.println (rator);
                     result = (new Integer (rator)).intValue() - (new Integer (rand)).intValue();
                     return ""+result;
                 case '*':

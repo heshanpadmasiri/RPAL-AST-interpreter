@@ -39,7 +39,6 @@ public class ASTParser extends Parser {
         FileName = fileName;
         getTokens();
         createTree();
-        System.out.println("Done");
     }
 
     private void getTokens(){
