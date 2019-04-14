@@ -8,8 +8,14 @@ public class STTransformer extends Parser {
     private Parser p = null;
     private ArrayList<String> controlStructure =  new ArrayList<>();
     private static int counter = 1;
-    private ArrayList<TreeNode> stack = new ArrayList<TreeNode>();
+    private ArrayList<TreeNode> stack = new ArrayList<>();
     private ArrayList<ArrayList<String>> controlStructureArray = new ArrayList<>();
+
+    /*
+    * =============================================================================
+    * Methods for converting AST nodes to ST nodes
+    * =============================================================================
+    * */
 
     private void convertLet(TreeNode node) {
         TreeNode X = null;
@@ -156,7 +162,7 @@ public class STTransformer extends Parser {
             while (! (PCopy.getRightChild().getTokenValue().equals("->") ||
                     PCopy.getRightChild().getTokenValue().equals(GAMMA) ||
                     PCopy.getRightChild().getTokenValue().startsWith("<INT:") ||
-                    lexer.getTypeOfToken(PCopy.getRightChild().getTokenValue()).equalsIgnoreCase("Operator_symbol") ||
+                    lexer.isOperatorSymbol(PCopy.getRightChild().getTokenValue()) ||
                     PCopy.getRightChild().getTokenValue().equalsIgnoreCase("aug")
             )
             )
