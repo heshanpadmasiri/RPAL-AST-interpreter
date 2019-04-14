@@ -34,12 +34,16 @@ public class ASTParser extends Parser {
     private String FileName;
     private List<String> tokenStrings;
 
+
+
     public ASTParser(String fileName) {
-        super(fileName);
+        super();
         FileName = fileName;
         getTokens();
         createTree();
     }
+
+
 
     private void getTokens(){
         try {
