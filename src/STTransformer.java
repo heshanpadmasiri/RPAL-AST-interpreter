@@ -302,12 +302,12 @@ public class STTransformer extends Parser {
         }
     }
 
-    private void constructAST(String rpalFileName) {
+    void constructAST(String rpalFileName) {
         p = new ASTParser (rpalFileName);
         p.preOrderTraversal ();
     }
 
-    private void constructST() {
+    void constructST() {
 
         /* IMP. We will need to invoke getRootTreeNode using the instance of the parent class.
          * The below call is going to traverse the tree recursively in a post order fashion and reduce it to a
@@ -514,19 +514,10 @@ public class STTransformer extends Parser {
         }
     }
 
-
     private String getValueOfToken(String token) {
         int beginIndex = token.indexOf(':')+1;
         if (beginIndex <= 0)
             return token;
         return token.substring(beginIndex, token.length()-1);
     }
-    public static void main (String[] args) {
-        String rpalFileName = args[0];
-        STTransformer subtreeTransformer = new STTransformer();
-        subtreeTransformer.constructAST(rpalFileName);
-        subtreeTransformer.constructST();
-
-    }
-
 }
