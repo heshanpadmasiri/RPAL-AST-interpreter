@@ -1,46 +1,21 @@
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
-
 import java.util.ArrayList;
-import java.util.Stack;
 
 public class STTransformer extends Parser {
 
-    private String rpalFileName = "";
     static final String GAMMA = "gamma";
     static final String LAMBDA = "lambda";
 
-    Parser p = null;
-    ArrayList<String> controlStructure =  new ArrayList ();
+    private Parser p = null;
+    private ArrayList<String> controlStructure =  new ArrayList<>();
     private static int counter = 1;
-    //Stack stack = new Stack ();
-    ArrayList stack = new ArrayList();
-    private ArrayList  controlStructureArray = new ArrayList  ();
+    private ArrayList<TreeNode> stack = new ArrayList<TreeNode>();
+    private ArrayList<ArrayList<String>> controlStructureArray = new ArrayList<>();
 
-    public ArrayList getControlStructureArray () {
-        return this.controlStructureArray;
-    }
-
-    public ArrayList getControlStructure(int index) {
-        try {
-            if (index < 0 ) {
-                throw new ArrayIndexOutOfBoundsException();
-            }
-            return (ArrayList) this.controlStructureArray.get(index);
-        } catch (ArrayIndexOutOfBoundsException ae) {
-            ae.printStackTrace();
-        }
-        return null;
-    }
-
-    public void convertLet (TreeNode node) {
+    private void convertLet(TreeNode node) {
         TreeNode X = null;
         TreeNode E = null;
         TreeNode P = null;
 
-        //TreeNode gammaNode = new TreeNode(GAMMA);
         TreeNode lambdaNode = new TreeNode (LAMBDA);
 
         if ( ! node.getTokenValue().equals("let") ) {
@@ -58,20 +33,19 @@ public class STTransformer extends Parser {
             node.setLeftChild(lambdaNode);
             lambdaNode.setRightChild(E);   // This would be the transformed lambda node.
             lambdaNode.setLeftChild(X);
+            assert X != null;
             X.setRightChild(P);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //preOrder(gammaNode, 0);
     }
 
-    public void convertWhere (TreeNode node) {
-        TreeNode X = null;
-        TreeNode E = null;
-        TreeNode P = null;
+    private void convertWhere(TreeNode node) {
+        TreeNode X;
+        TreeNode E;
+        TreeNode P;
 
-        //TreeNode gammaNode = new TreeNode(GAMMA);  //Transforming the input Where node to gamma node.
         TreeNode lambdaNode = new TreeNode (LAMBDA);
         if ( ! node.getTokenValue().equals("where") ) {
             return;
@@ -84,21 +58,11 @@ public class STTransformer extends Parser {
             X = node.getLeftChild().getRightChild().getLeftChild();
             E =  node.getLeftChild().getRightChild().getLeftChild().getRightChild();
 
-
-
-
-
             node.setLeftChild(lambdaNode);
-
             node.setRightChild  (null);  // null the right child of the incoming where node
-
-            //P.setLeftChild(null);
             P.setRightChild(null);
-            //X.setLeftChild(null);
             X.setRightChild(P);
-
             lambdaNode.setLeftChild(X);
-
             lambdaNode.setRightChild(E);
 
             preOrder(node, 0);
@@ -106,12 +70,11 @@ public class STTransformer extends Parser {
 
     }
 
-    public void convertWithin (TreeNode node) {
-        TreeNode X1 = null;
-        TreeNode E1 = null;
-        TreeNode X2 = null;
-        TreeNode E2 = null;
-        //TreeNode equalsNode = new TreeNode("=");
+    private void convertWithin(TreeNode node) {
+        TreeNode X1;
+        TreeNode E1;
+        TreeNode X2;
+        TreeNode E2;
 
         TreeNode gammaNode = new TreeNode(GAMMA);
         TreeNode lambdaNode = new TreeNode (LAMBDA);
@@ -121,17 +84,12 @@ public class STTransformer extends Parser {
         }
 
         node.setTokenValue("=");
-        //node.setRightChild(null);   // This might be a blunder
 
         if ( node.getLeftChild().getTokenValue().equals("=") && node.getLeftChild().getRightChild().getTokenValue().equals("=")) {
             X1 = node.getLeftChild().getLeftChild();
-
             E1 = node.getLeftChild().getLeftChild().getRightChild();
-
             X2 = node.getLeftChild().getRightChild().getLeftChild();
-
             E2 =  node.getLeftChild().getRightChild().getLeftChild().getRightChild();
-
 
             node.setLeftChild(X2);
             X2.setRightChild(gammaNode);
@@ -142,18 +100,14 @@ public class STTransformer extends Parser {
             lambdaNode.setLeftChild(X1);
             X1.setRightChild(E2);
             X1.setLeftChild(null);
-
-            // preOrder(node, 0);
         }
     }
 
-    public void convertRec (TreeNode node) {
-        TreeNode X = null;
-        TreeNode E = null;
+    private void convertRec(TreeNode node) {
+        TreeNode X;
+        TreeNode E;
 
-        //TreeNode equalsNode = new TreeNode("=");
         TreeNode ystar = new TreeNode("<Y*>");
-
 
         TreeNode gammaNode = new TreeNode(GAMMA);
         TreeNode lambdaNode = new TreeNode (LAMBDA);
@@ -181,11 +135,11 @@ public class STTransformer extends Parser {
         }
     }
 
-    public void convertFcnForm (TreeNode node) {
+    private void convertFcnForm(TreeNode node) {
 
-        TreeNode P = null;
-        ArrayList<TreeNode> V = new ArrayList<TreeNode> ();
-        TreeNode E = null;
+        TreeNode P;
+        ArrayList<TreeNode> V = new ArrayList<>();
+        TreeNode E;
 
         TreeNode equalsNode = new TreeNode("=");
         TreeNode gammaNode = new TreeNode(GAMMA);
@@ -205,15 +159,14 @@ public class STTransformer extends Parser {
                     lexer.getTypeOfToken(PCopy.getRightChild().getTokenValue()).equalsIgnoreCase("Operator_symbol") ||
                     PCopy.getRightChild().getTokenValue().equalsIgnoreCase("aug")
             )
-            ) {    // first i thought only ->
+            )
+            {
                 V.add(PCopy.getRightChild());
                 PCopy = PCopy.getRightChild();
             }
 
             E = PCopy.getRightChild(); // The last node should be E
             P.setRightChild(lambdaNode);
-
-
 
             for (int i=0; i < V.size(); i++) {
                 lambdaNode.setLeftChild(V.get(i));
@@ -231,13 +184,12 @@ public class STTransformer extends Parser {
         }
     }
 
-    public void convertAnd (TreeNode node) {
+    private void convertAnd(TreeNode node) {
 
 
-        ArrayList <TreeNode> X = new ArrayList<TreeNode> ();
-        ArrayList <TreeNode> E = new ArrayList<TreeNode> ();
+        ArrayList <TreeNode> X = new ArrayList<>();
+        ArrayList <TreeNode> E = new ArrayList<>();
 
-        //TreeNode equalsNode = new TreeNode("=");
 
         TreeNode gammaNode = new TreeNode(GAMMA);
         TreeNode lambdaNode = new TreeNode (LAMBDA);
@@ -261,7 +213,7 @@ public class STTransformer extends Parser {
                 equalNodeCopy = equalNodeCopy.getRightChild();
             }
 
-            // Disconnect the last X node's right child. This infact worked.
+            // Disconnect the last X node's right child.
             X.get(X.size()-1).setRightChild(null);
 
 
@@ -282,21 +234,18 @@ public class STTransformer extends Parser {
         }
     }
 
-    public void convertAtTheRateOf (TreeNode node) {
-        TreeNode E1 = null;
-        TreeNode N = null;
-        TreeNode E2 = null;
+    private void convertAtTheRateOf(TreeNode node) {
+        TreeNode E1;
+        TreeNode N;
+        TreeNode E2;
 
-        //TreeNode gammaNode1 = new TreeNode(GAMMA);
         TreeNode gammaNode2 = new TreeNode(GAMMA);
         if ( ! node.getTokenValue().equals("@") ) {
             return;
         }
 
         node.setTokenValue(GAMMA);
-
         E1 = node.getLeftChild();
-
         N = E1.getRightChild();
         E2 = N.getRightChild();
 
@@ -305,12 +254,7 @@ public class STTransformer extends Parser {
         gammaNode2.setLeftChild(N);
 
         N.setRightChild(E1);
-
-        // E1.setLeftChild(null); fix for bug on pairs1
         E1.setRightChild(null);
-
-
-
     }
 
     private void postOrder (TreeNode t) {
@@ -326,72 +270,63 @@ public class STTransformer extends Parser {
     private void reduceConstruct (TreeNode t) {
         String nodeValue = t.getTokenValue();
 
-        if (nodeValue.equals("let")) {
-            convertLet(t);
+        switch (nodeValue) {
+            case "let":
+                convertLet(t);
+                break;
+            case "where":
+                convertWhere(t);
+                break;
+            case "within":
+                convertWithin(t);
+                break;
+            case "rec":
+                convertRec(t);
+                break;
+            case "function_form":
+                convertFcnForm(t);
+                break;
+            case "and":
+                convertAnd(t);
+                break;
+            case "@":
+                convertAtTheRateOf(t);
+                break;
+            default:
         }
-        else if (nodeValue.equals("where")) {
-            convertWhere (t);
-        }
-        else if (nodeValue.equals("within")) {
-            convertWithin (t);
-        }
-        else if (nodeValue.equals("rec")) {
-            convertRec(t);
-        }
-        else if (nodeValue.equals("function_form")) {
-            convertFcnForm(t);
-        }
-        else if (nodeValue.equals ("and")) {
-            convertAnd(t);
-        }
-        else if (nodeValue.equals ("@")) {
-            convertAtTheRateOf(t);
-        }
-        else
-            return;
     }
 
-    public void constructAST (String rpalFileName) {
-        this.rpalFileName = rpalFileName;
+    private void constructAST(String rpalFileName) {
         p = new ASTParser (rpalFileName);
         p.preOrderTraversal ();
-
-
     }
 
-    public void constructST () {
+    private void constructST() {
 
         /* IMP. We will need to invoke getRootTreeNode using the instance of the parent class.
          * The below call is going to traverse the tree recursively in a post order fashion and reduce it to a
          * partial standard tree.*/
 
         this.postOrder(p.getRootTreeNode());
-
-        //Print it out in a pre-order way
         p.preOrder(p.getRootTreeNode(), 0);
-
         this.generateControlStructures();
     }
 
-    public void generateControlStructures () {
+    private void generateControlStructures() {
 
-        /* Logic would be to travers through the control Elemets in a pre-order way
+        /* Logic would be to travers through the control elements in a pre-order way
          * when we encounter a lambda switch to a new context.
          */
 
-        //stack.push(p.getRootTreeNode());
         stack.add(p.getRootTreeNode());
-        //preOrderTraverse (p.getRootTreeNode());
 
-        //while (!stack.empty()) {
         while (stack.size() != 0) {
-            //TreeNode elem = (TreeNode) stack.pop();
-            TreeNode elem = (TreeNode) stack.get(0);     // not a real stack, but arraylist based. so extra step will be to remove the first element.
+            TreeNode elem = stack.get(0);
             stack.remove(0);
 
             controlStructure = preOrderTraverse (elem);
-            this.controlStructureArray.add(controlStructure);          // We will have the final control structure (flattened here)
-            controlStructure = new ArrayList (); // We need to do this to clear out the arrayList
+            this.controlStructureArray.add(controlStructure); // We will have the final control structure (flattened here)
+            controlStructure = new ArrayList<>(); // We need to do this to clear out the arrayList
 
         }
 
@@ -400,73 +335,68 @@ public class STTransformer extends Parser {
         cseMachine.runCSEMachine();
     }
 
-    public ArrayList preOrderTraverse (TreeNode t) {
+    private ArrayList<String> preOrderTraverse(TreeNode t) {
 
 
-        TreeNode temp = null;
+        switch (t.getTokenValue()) {
+            case LAMBDA:
+                if (t.getLeftChild().getTokenValue().equals(",")) {
+                    TreeNode node = t.getLeftChild().getLeftChild();
+                    StringBuffer sb = new StringBuffer();
+                    while (node != null) {
+                        sb.append(getValueOfToken(node.getTokenValue()) + ",");
+                        node = node.getRightChild();
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    controlStructure.add(t.getTokenValue() + "~" + (counter) + "~" + "{" + sb.toString() + "}");
+                    counter++;
+                } else {
+                    controlStructure.add(t.getTokenValue() + "~" + (counter) + "~" + getValueOfToken(t.getLeftChild().getTokenValue()));
+                    counter++;
 
-        if (t.getTokenValue().equals(LAMBDA)) {
-            if (t.getLeftChild().getTokenValue().equals(",")) {
-                TreeNode node = t.getLeftChild().getLeftChild();
-                StringBuffer sb = new StringBuffer ();
-                while (node != null) {
-                    sb.append (getValueofToken(node.getTokenValue())+ ",");
-                    node = node.getRightChild();
                 }
-                sb.deleteCharAt(sb.length()-1);
-                controlStructure.add (t.getTokenValue() + "~" + (counter) + "~" + "{" + sb.toString() + "}");
-                counter++;
+                stack.add(t.getLeftChild().getRightChild());
+                if (t.getRightChild() != null) {
+                    preOrderTraverse(t.getRightChild());
+                }
 
-            }
+                return controlStructure;
 
-            else {
-                controlStructure.add (t.getTokenValue() + "~" + (counter) + "~" + getValueofToken(t.getLeftChild().getTokenValue()));
-                counter++;
-
-            }
-            //stack.push(t.getLeftChild().getRightChild());
-            stack.add(t.getLeftChild().getRightChild());
-            if (t.getRightChild() != null) {
-                preOrderTraverse (t.getRightChild());
-            }
-
-            return controlStructure; // will this backtrace ?
-        }
-        else if (t.getTokenValue().equals("->")) {
-            StringBuffer deltaThen = new StringBuffer ();
-            StringBuffer deltaElse = new StringBuffer ();
-            StringBuffer B = new StringBuffer ();
+            case "->":
+                StringBuffer deltaThen = new StringBuffer();
+                StringBuffer deltaElse = new StringBuffer();
+                StringBuffer B = new StringBuffer();
 
 
-            litePreOrderTraverse(t.getLeftChild().getRightChild().getRightChild(), deltaElse, "");
-            controlStructure.add ("deltaelse:" + deltaElse);
+                litePreOrderTraverse(t.getLeftChild().getRightChild().getRightChild(), deltaElse, "");
+                controlStructure.add("deltaelse:" + deltaElse);
 
-            //disconnect the else part
-            t.getLeftChild().getRightChild().setRightChild(null);
+                //disconnect the else part
+                t.getLeftChild().getRightChild().setRightChild(null);
 
-            litePreOrderTraverse(t.getLeftChild().getRightChild(), deltaThen, "then");
-            controlStructure.add ("deltathen:" + deltaThen);
-            //disconnect the then part
-            t.getLeftChild().setRightChild(null);
+                litePreOrderTraverse(t.getLeftChild().getRightChild(), deltaThen, "then");
+                controlStructure.add("deltathen:" + deltaThen);
+                //disconnect the then part
+                t.getLeftChild().setRightChild(null);
 
-            litePreOrderTraverse(t.getLeftChild(), B, "B");
-            controlStructure.add("Beta:" + B);
+                litePreOrderTraverse(t.getLeftChild(), B, "B");
+                controlStructure.add("Beta:" + B);
 
-            if (t.getRightChild() != null) {
-                preOrderTraverse (t.getRightChild());
-            }
+                if (t.getRightChild() != null) {
+                    preOrderTraverse(t.getRightChild());
+                }
 
-            return controlStructure; // will this backtrace ?
+                return controlStructure;
 
-        }
-        else if (t.getTokenValue().equals("tau")) {
-            StringBuffer sb = new StringBuffer ();
-            litePreOrderTraverse (t, sb, "");
-            controlStructure.add(sb.toString());
-            return controlStructure;
-        }
-        else {
-            controlStructure.add(t.getTokenValue());
+
+            case "tau":
+                StringBuffer sb = new StringBuffer();
+                litePreOrderTraverse(t, sb, "");
+                controlStructure.add(sb.toString());
+                return controlStructure;
+            default:
+                controlStructure.add(t.getTokenValue());
+                break;
         }
         if  (t.getLeftChild() != null ) {
             preOrderTraverse (t.getLeftChild());
@@ -485,7 +415,7 @@ public class STTransformer extends Parser {
                 TreeNode node = t.getLeftChild().getLeftChild();
                 StringBuffer sb1 = new StringBuffer ();
                 while (node != null) {
-                    sb1.append (getValueofToken(node.getTokenValue())+ ",");
+                    sb1.append (getValueOfToken(node.getTokenValue())+ ",");
                     node = node.getRightChild();
                 }
                 sb1.deleteCharAt(sb1.length()-1);
@@ -495,36 +425,35 @@ public class STTransformer extends Parser {
             }
 
             else {
-                sb.append(t.getTokenValue() + "~" + (counter) + "~" + getValueofToken(t.getLeftChild().getTokenValue()) +" ");
+                sb.append(t.getTokenValue() + "~" + (counter) + "~" + getValueOfToken(t.getLeftChild().getTokenValue()) +" ");
                 counter++;
 
             }
-            //stack.push(t.getLeftChild().getRightChild());
             stack.add(t.getLeftChild().getRightChild());
-            t.setLeftChild(null);   // hack to prevent the below getLeft child from running.
+            t.setLeftChild(null);   // Prevent the below getLeft child from running.
         }
         else if (t.getTokenValue().equals("->")) {
             StringBuffer deltaThen = new StringBuffer ();
             StringBuffer deltaElse = new StringBuffer ();
             StringBuffer B = new StringBuffer ();
-            StringBuffer result = new StringBuffer ();
+            StringBuilder result = new StringBuilder();
 
             litePreOrderTraverse(t.getLeftChild().getRightChild().getRightChild(), deltaElse, "");
             //controlStructure.add ("deltaelse:" + deltaElse);
-            result.append("deltaelse:" + deltaElse);
+            result.append("deltaelse:").append(deltaElse);
 
             //disconnect the else part
             t.getLeftChild().getRightChild().setRightChild(null);
 
             litePreOrderTraverse(t.getLeftChild().getRightChild(), deltaThen, "then");
             //controlStructure.add ("deltathen:" + deltaThen);
-            result.append("deltathen:" + deltaThen);
+            result.append("deltathen:").append(deltaThen);
             //disconnect the then part
             t.getLeftChild().setRightChild(null);
 
             litePreOrderTraverse(t.getLeftChild(), B, "B");
             //controlStructure.add("Beta:" + B);
-            result.append("Beta:" + B);
+            result.append("Beta:").append(B);
 
             // add this to the end  ?
             sb.append(result);
@@ -551,19 +480,16 @@ public class STTransformer extends Parser {
                 }
                 t.setTokenValue("tau_"+tempCount+";");
             }
-            sb.append(t.getTokenValue() + " " );
+            sb.append(t.getTokenValue()).append(" ");
         }
 
 
         if  (t.getLeftChild() != null ) {
             litePreOrderTraverse (t.getLeftChild(), sb, delta);
         }
-        //if (! (delta.equals("then") || delta.equals("B") )) {
         if (t.getRightChild() != null) {
             litePreOrderTraverse (t.getRightChild(), sb, delta);
         }
-        //}
-        //sb.deleteCharAt(sb.length()-1);
         return sb;
     }
 
@@ -583,40 +509,18 @@ public class STTransformer extends Parser {
     }
 
 
-    private String getValueofToken (String token) {
+    private String getValueOfToken(String token) {
         int beginIndex = token.indexOf(':')+1;
         if (beginIndex <= 0)
             return token;
         return token.substring(beginIndex, token.length()-1);
     }
-    public static void main (String args[]) {
-        // create Options object
-        Options options = new Options();
-        // add t option
-        options.addOption("ast", true, "rpal test file name");
-        options.addOption("noout", false, "No output computation");
+    public static void main (String[] args) {
+        String rpalFileName = args[0];
+        STTransformer subtreeTransformer = new STTransformer();
+        subtreeTransformer.constructAST(rpalFileName);
+        subtreeTransformer.constructST();
 
-        CommandLineParser parser = new PosixParser();
-        STTransformer subtreeTransformer = null;
-        try {
-            CommandLine cmd = parser.parse( options, args);
-            if (cmd.hasOption("l")) {
-                return;
-            }
-
-            if (cmd.hasOption("ast")) {
-                String rpalFileName = cmd.getOptionValue("ast");
-                subtreeTransformer = new STTransformer();
-                subtreeTransformer.constructAST(rpalFileName);
-
-            }
-            if (! cmd.hasOption("noout")) {
-
-                subtreeTransformer.constructST();
-            }
-        } catch (Exception e1) {
-            System.out.println (e1.getMessage());
-        }
     }
 
 }
