@@ -1,7 +1,8 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.List;
 
 class TempTreeNode extends TreeNode {
 
@@ -14,15 +15,15 @@ class TempTreeNode extends TreeNode {
         this.parent = null;
     }
 
-    public int getDepth() {
+    int getDepth() {
         return depth;
     }
 
-    public TempTreeNode getParent() {
+    TempTreeNode getParent() {
         return parent;
     }
 
-    public void setParent(TempTreeNode parent) {
+    void setParent(TempTreeNode parent) {
         this.parent = parent;
     }
 
@@ -34,16 +35,12 @@ public class ASTParser extends Parser {
     private String FileName;
     private List<String> tokenStrings;
 
-
-
-    public ASTParser(String fileName) {
+    ASTParser(String fileName) {
         super();
         FileName = fileName;
         getTokens();
         createTree();
     }
-
-
 
     private void getTokens(){
         try {
@@ -94,11 +91,6 @@ public class ASTParser extends Parser {
             // move up
             insertNode(previous.getParent(), next);
         }
-    }
-
-    public static void main(String[] args) {
-        ASTParser parser = new ASTParser("ast.txt");
-
     }
 }
 
